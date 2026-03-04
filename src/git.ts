@@ -41,6 +41,24 @@ export class GitClient {
     await this.git.add('.');
   }
 
+  async getCurrentBranch(): Promise<string> {
+    const name = await this.git.revparse(['--abbrev-ref', 'HEAD']);
+    return name.trim();
+  }
+
+  async pushOrigin(branch: string, setUpstream: boolean = false): Promise<boolean> {
+    try {
+      if (setUpstream) {
+        await this.git.raw(['push', '-u', 'origin', branch]);
+      } else {
+        await this.git.push('origin', branch);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async getRecentCommits(count: number = 10): Promise<string> {
     const log = await this.git.log({ maxCount: count });
     return log.all.map((commit) => `${commit.hash.substring(0, 7)} - ${commit.message}`).join('\n');

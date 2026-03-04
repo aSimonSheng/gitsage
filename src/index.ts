@@ -6,6 +6,9 @@ import inquirer from 'inquirer';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync, existsSync, readFileSync as fsReadFileSync, writeFileSync, chmodSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { mkdtempSync } from 'fs';
+import { spawnSync } from 'child_process';
 import { getConfig, setConfig } from './config.js';
 import git from './git.js';
 import ai from './ai.js';
@@ -266,7 +269,9 @@ program
   .description('Generate PR title and description from changes')
   .option('--base <ref>', 'Compare base ref, e.g., origin/main', 'origin/main')
   .option('--write <path>', 'Write PR description markdown to file')
-  .action(async (options: { base: string; write?: string }) => {
+  .option('--push', 'Push current branch to origin before creating PR')
+  .option('--open', 'Create PR via GitHub CLI after generation')
+  .action(async (options: { base: string; write?: string; push?: boolean; open?: boolean }) => {
     printBanner();
     if (!(await git.isRepo())) {
       console.log(chalk.red('Error: Not a git repository'));
@@ -282,6 +287,29 @@ program
       if (options.write) {
         writeFileSync(options.write, `# ${title}\n\n${body}\n`, 'utf8');
         console.log(chalk.gray(`\nWritten to ${options.write}`));
+      }
+      if (options.push || options.open) {
+        const branch = await git.getCurrentBranch();
+        if (options.push) {
+          const pushed = await git.pushOrigin(branch, true);
+          if (pushed) {
+            console.log(chalk.green(`Pushed branch ${branch} to origin`));
+          } else {
+            console.log(chalk.yellow(`Failed to push branch ${branch}; please push manually.`));
+          }
+        }
+        if (options.open) {
+          const dir = mkdtempSync(`${tmpdir()}/gitsage-`);
+          const prBodyPath = join(dir, 'PR_BODY.md');
+          writeFileSync(prBodyPath, `${body}\n`, 'utf8');
+          const args = ['pr', 'create', '-t', title, '-F', prBodyPath, '-f'];
+          const res = spawnSync('gh', args, { stdio: 'inherit' });
+          if (res.status === 0) {
+            console.log(chalk.green('PR created successfully.'));
+          } else {
+            console.log(chalk.red('Failed to create PR via GitHub CLI.'));
+          }
+        }
       }
     } catch (e: any) {
       spinner.fail('Failed');
@@ -327,6 +355,62 @@ program
       console.log(chalk.red(e.message));
       process.exit(1);
     }
+  });
+
+program
+  .command('init')
+  .description('Interactive setup for GitSage (provider, API key, commit hook)')
+  .action(async () => {
+    printBanner();
+    if (!(await git.isRepo())) {
+      console.log(chalk.red('Error: Not a git repository'));
+      process.exit(1);
+    }
+    const answers = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'provider',
+        message: 'Choose AI provider',
+        choices: [
+          { name: 'OpenAI', value: 'openai' },
+          { name: 'Anthropic', value: 'anthropic' },
+        ],
+        default: 'openai',
+      },
+      {
+        type: 'input',
+        name: 'apiKey',
+        message: (a: any) => `Enter ${a.provider} API key (leave blank to use environment variable)`,
+        filter: (v: string) => v.trim(),
+      },
+      {
+        type: 'confirm',
+        name: 'installHook',
+        message: 'Install commit-msg hook to enforce Conventional Commits?',
+        default: true,
+      },
+    ]);
+    setConfig('aiProvider', answers.provider);
+    if (answers.provider === 'openai') {
+      if (answers.apiKey) setConfig('openai.apiKey', answers.apiKey);
+    } else {
+      if (answers.apiKey) setConfig('anthropic.apiKey', answers.apiKey);
+    }
+    if (answers.installHook) {
+      const hookPath = join(process.cwd(), '.git', 'hooks', 'commit-msg');
+      const script = `#!/bin/sh
+# GitSage commit message guard
+if command -v gitsage >/dev/null 2>&1; then
+  gitsage guard --file "$1" --explain || exit 1
+else
+  echo "gitsage not found; skipping guard" >&2
+fi
+`;
+      writeFileSync(hookPath, script, 'utf8');
+      chmodSync(hookPath, 0o755);
+      console.log(chalk.green('Installed commit-msg hook.'));
+    }
+    console.log(chalk.green('GitSage is configured. Happy committing!'));
   });
 
 program.parse();

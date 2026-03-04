@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import * as changelog from '../../modules/changelog';
 
 // Mock git module imported as '../git.js' in changelog.ts
