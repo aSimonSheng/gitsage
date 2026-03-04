@@ -23,7 +23,9 @@ try {
     const pkgJson = JSON.parse(readFileSync(pkgPath, 'utf8'));
     pkgVersion = pkgJson.version || pkgVersion;
   }
-} catch {}
+} catch {
+  // noop
+}
 
 const program = new Command();
 

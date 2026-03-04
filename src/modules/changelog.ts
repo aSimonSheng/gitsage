@@ -2,11 +2,6 @@ import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import git from '../git.js';
 
-type Commit = {
-  hash: string;
-  message: string;
-};
-
 const TYPE_TITLES: Record<string, string> = {
   feat: 'Features',
   fix: 'Fixes',
@@ -35,7 +30,7 @@ export async function generateChangelog(since?: string): Promise<string> {
   const sinceRef = since || (await git.getLastTag()) || undefined;
   const log = await git.getLogSince(sinceRef);
   const groups: Record<string, string[]> = {};
-  let breakingChanges: string[] = [];
+  const breakingChanges: string[] = [];
   for (const entry of log) {
     const parsed = parseType(entry.message);
     if (parsed.breaking) {
@@ -84,7 +79,9 @@ export async function suggestNextVersion(): Promise<string> {
       const pkgJson = JSON.parse(readFileSync(pkgPath, 'utf8'));
       current = pkgJson.version || current;
     }
-  } catch {}
+  } catch {
+    // noop
+  }
   const [major, minor, patch] = current.split('.').map((n: string) => parseInt(n, 10) || 0);
   if (hasBreaking) {
     return `${major + 1}.0.0`;
@@ -94,4 +91,3 @@ export async function suggestNextVersion(): Promise<string> {
   }
   return `${major}.${minor}.${patch + 1}`;
 }
-

@@ -14,7 +14,7 @@ const TYPES = [
 
 export function validateCommitMessage(message: string): boolean {
   const conventional = new RegExp(
-    `^(${TYPES.join('|')})(\\([\\w\\-\\.]+\\))?!?:\\s.{1,72}$`
+    `^(${TYPES.join('|')})(\\([\\w\\-.]+\\))?!?:\\s.{1,72}$`
   );
   return conventional.test(message.trim());
 }
@@ -29,7 +29,7 @@ export function explainValidation(message: string): string {
   if (!typeMatch) {
     parts.push(`- Must start with one of: ${TYPES.join(', ')}`);
   }
-  const scopeOk = /\([\w\-\.]+\)/.test(msg) || /: /.test(msg);
+  const scopeOk = /\([\w\-.]+\)/.test(msg) || /: /.test(msg);
   if (!scopeOk) {
     parts.push('- Missing scope parentheses before colon, e.g., feat(api): ...');
   }
