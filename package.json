@@ -15,7 +15,8 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "release": "semantic-release"
   },
   "keywords": [
     "git",
@@ -35,6 +36,12 @@
     "simple-git": "^3.24.0"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.6",
+    "@semantic-release/npm": "^13.1.5",
+    "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -42,6 +49,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.2",
     "prettier": "^3.8.1",
+    "semantic-release": "^25.0.3",
     "tsup": "^8.0.2",
     "typescript": "^5.3.3",
     "vitest": "^1.3.1"
