@@ -171,6 +171,25 @@ configCmd
   });
 
 configCmd
+  .command('get')
+  .argument('<key>', 'Configuration key to read')
+  .description('Get a configuration value')
+  .action((key: string) => {
+    const config = getConfig() as any;
+    const parts = key.split('.');
+    let cur: any = config;
+    for (const p of parts) {
+      if (cur == null) break;
+      cur = cur[p];
+    }
+    if (typeof cur === 'object') {
+      console.log(JSON.stringify(cur, null, 2));
+    } else {
+      console.log(String(cur ?? ''));
+    }
+  });
+
+configCmd
   .command('export')
   .argument('[file]', 'Output file path', 'gitsage-config.json')
   .description('Export current configuration to JSON file')
@@ -490,9 +509,10 @@ fi
 program
   .command('doctor')
   .description('Diagnose environment (config, network, git, gh)')
-  .action(async () => {
+  .option('--verbose', 'Show extra diagnostics like DNS resolution')
+  .action(async (options: { verbose?: boolean }) => {
     printBanner();
-    await runDoctor();
+    await runDoctor({ verbose: !!options.verbose });
   });
 
 program.parse();

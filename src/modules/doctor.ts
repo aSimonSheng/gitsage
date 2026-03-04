@@ -2,6 +2,8 @@ import chalk from 'chalk';
 import fetch from 'node-fetch';
 import { ProxyAgent } from 'proxy-agent';
 import { spawnSync } from 'child_process';
+import { URL } from 'url';
+import dns from 'dns';
 import git from '../git.js';
 import { getConfig } from '../config.js';
 
@@ -30,7 +32,7 @@ function maskKey(key?: string) {
   return key.slice(0, 3) + '***' + key.slice(-3);
 }
 
-async function checkAI(): Promise<CheckResult[]> {
+async function checkAI(verbose = false): Promise<CheckResult[]> {
   const cfg = getConfig();
   const out: CheckResult[] = [];
   out.push({ name: 'AI provider', ok: true, info: cfg.aiProvider });
@@ -39,14 +41,14 @@ async function checkAI(): Promise<CheckResult[]> {
     const base = (cfg.openai.baseURL && cfg.openai.baseURL.trim()) || 'https://api.openai.com';
     out.push({ name: 'OpenAI key', ok: !!apiKey, info: apiKey ? maskKey(apiKey) : 'Missing (using env OPENAI_API_KEY if set)' });
     out.push({ name: 'OpenAI baseURL', ok: true, info: base });
-    const net = await tryReach(base);
+    const net = await tryReach(base, verbose);
     out.push({ name: 'Network to baseURL', ok: net.ok, info: net.info });
   } else {
     const apiKey = cfg.anthropic.apiKey || process.env.ANTHROPIC_API_KEY || '';
     const base = (cfg.anthropic.baseURL && cfg.anthropic.baseURL.trim()) || 'https://api.anthropic.com';
     out.push({ name: 'Anthropic key', ok: !!apiKey, info: apiKey ? maskKey(apiKey) : 'Missing (using env ANTHROPIC_API_KEY if set)' });
     out.push({ name: 'Anthropic baseURL', ok: true, info: base });
-    const net = await tryReach(base);
+    const net = await tryReach(base, verbose);
     out.push({ name: 'Network to baseURL', ok: net.ok, info: net.info });
   }
   const proxies = ['HTTPS_PROXY', 'HTTP_PROXY', 'NO_PROXY'].map((k) => `${k}=${process.env[k] ?? ''}`).join(' ');
@@ -54,9 +56,19 @@ async function checkAI(): Promise<CheckResult[]> {
   return out;
 }
 
-async function tryReach(base: string): Promise<{ ok: boolean; info: string }> {
+async function tryReach(base: string, verbose = false): Promise<{ ok: boolean; info: string }> {
   const url = base.replace(/\/+$/, '');
   try {
+    if (verbose) {
+      const u = new URL(url);
+      const host = u.hostname;
+      try {
+        const records = await dns.promises.lookup(host);
+        console.log(chalk.gray(`DNS ${host} -> ${records.address}`));
+      } catch (e: any) {
+        console.log(chalk.yellow(`DNS lookup failed for ${host}: ${e?.message || 'Unknown error'}`));
+      }
+    }
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 2000);
     // We don't require 200; any HTTP response indicates basic reachability
@@ -69,10 +81,10 @@ async function tryReach(base: string): Promise<{ ok: boolean; info: string }> {
   }
 }
 
-export async function runDoctor(): Promise<void> {
+export async function runDoctor(opts?: { verbose?: boolean }): Promise<void> {
   const checks: CheckResult[] = [];
   checks.push(...await checkGit());
-  checks.push(...await checkAI());
+  checks.push(...await checkAI(!!opts?.verbose));
 
   const okAll = checks.every(c => c.ok);
   for (const c of checks) {

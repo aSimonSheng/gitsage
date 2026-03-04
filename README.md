@@ -89,8 +89,10 @@ gitsage analyze
 | `gitsage init` | Interactive setup and commit-msg hook |
 | `gitsage pr --push --open` | Generate and open a GitHub PR |
 | `gitsage doctor` | Diagnose config, network, git and gh |
+| `gitsage doctor --verbose` | Verbose diagnostics (DNS, more details) |
 | `gitsage config export [path]` | Export current config to JSON |
 | `gitsage config import <path>` | Import config from JSON |
+| `gitsage config get <key>` | Get a configuration value |
 | `gitsage config list` | Show configuration |
 | `gitsage config set <key> <value>` | Update configuration |
 
@@ -129,6 +131,8 @@ Semantic-release keeps versions and CHANGELOG up-to-date.
 
 ```bash
 gitsage doctor
+# or verbose:
+gitsage doctor --verbose
 ```
 
 It will check:
