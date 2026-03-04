@@ -1,0 +1,31 @@
+name: Bug Report
+description: Report a reproducible bug
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps To Reproduce
+      description: Minimal steps to reproduce
+      placeholder: |
+        1. Run ...
+        2. Execute ...
+        3. See error ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: gitsage 1.0.0, Node 18
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Screenshots
