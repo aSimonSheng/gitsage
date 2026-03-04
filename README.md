@@ -50,6 +50,8 @@ gitsage config set aiProvider anthropic
 gitsage init
 ```
 
+Chinese docs: see [README_CN.md](file:///Users/bytedance/pinggai/gitsage/README_CN.md)
+
 China-friendly presets are available in init for OpenAI-compatible endpoints:
 - Kimi (Moonshot): https://api.moonshot.cn
 - Zhipu GLM: https://open.bigmodel.cn/api/paas/v4
@@ -86,6 +88,9 @@ gitsage analyze
 | `gitsage analyze` | Analyze current changes |
 | `gitsage init` | Interactive setup and commit-msg hook |
 | `gitsage pr --push --open` | Generate and open a GitHub PR |
+| `gitsage doctor` | Diagnose config, network, git and gh |
+| `gitsage config export [path]` | Export current config to JSON |
+| `gitsage config import <path>` | Import config from JSON |
 | `gitsage config list` | Show configuration |
 | `gitsage config set <key> <value>` | Update configuration |
 
@@ -119,6 +124,20 @@ gitsage config set openai.model moonshot-v1-8k
 Semantic-release keeps versions and CHANGELOG up-to-date.
 - Configure repository secrets: GITHUB_TOKEN (default) and NPM_TOKEN (optional for npm publish).
 - Push to main with conventional commits; release workflow will publish GitHub Release and update CHANGELOG.md.
+
+### Doctor (Self-Check)
+
+```bash
+gitsage doctor
+```
+
+It will check:
+- Git repo/branch and gh CLI presence
+- AI provider, API key presence (masked), baseURL
+- Basic network reachability to baseURL (HTTP status indicates connectivity)
+- Proxy env (HTTPS_PROXY/HTTP_PROXY/NO_PROXY)
+
+If some checks fail, follow the hints to set config keys or proxies.
 
 ## 🤝 Contributing
 

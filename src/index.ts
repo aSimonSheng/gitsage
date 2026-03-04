@@ -15,6 +15,7 @@ import ai from './ai.js';
 import { validateCommitMessage, explainValidation } from './modules/guard.js';
 import { generatePrTitleAndBody } from './modules/pr.js';
 import { generateChangelog, suggestNextVersion } from './modules/changelog.js';
+import { runDoctor } from './modules/doctor.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -167,6 +168,43 @@ configCmd
   .action((key: string, value: string) => {
     setConfig(key, value);
     console.log(chalk.green(`Set ${key} = ${value}`));
+  });
+
+configCmd
+  .command('export')
+  .argument('[file]', 'Output file path', 'gitsage-config.json')
+  .description('Export current configuration to JSON file')
+  .action((file: string) => {
+    const data = JSON.stringify(getConfig(), null, 2);
+    writeFileSync(file, data + '\n', 'utf8');
+    console.log(chalk.green(`Config exported to ${file}`));
+  });
+
+configCmd
+  .command('import')
+  .argument('<file>', 'JSON file path to import')
+  .description('Import configuration from JSON file')
+  .action((file: string) => {
+    try {
+      const raw = fsReadFileSync(file, 'utf8');
+      const obj = JSON.parse(raw);
+      const apply = (o: any, prefix: string[] = []) => {
+        Object.keys(o).forEach((k) => {
+          const v = o[k];
+          const path = [...prefix, k];
+          if (v && typeof v === 'object' && !Array.isArray(v)) {
+            apply(v, path);
+          } else {
+            setConfig(path.join('.'), v);
+          }
+        });
+      };
+      apply(obj, []);
+      console.log(chalk.green(`Imported config from ${file}`));
+    } catch (e: any) {
+      console.log(chalk.red(`Failed to import: ${e?.message || 'Unknown error'}`));
+      process.exit(1);
+    }
   });
 
 program
@@ -447,6 +485,14 @@ fi
       console.log(chalk.green('Installed commit-msg hook.'));
     }
     console.log(chalk.green('GitSage is configured. Happy committing!'));
+  });
+
+program
+  .command('doctor')
+  .description('Diagnose environment (config, network, git, gh)')
+  .action(async () => {
+    printBanner();
+    await runDoctor();
   });
 
 program.parse();
