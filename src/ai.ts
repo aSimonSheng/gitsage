@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { ProxyAgent } from 'proxy-agent';
 import { getConfig } from './config.js';
 
 export interface AIMessage {
@@ -7,6 +8,7 @@ export interface AIMessage {
 }
 
 export class AIClient {
+  private agent = new ProxyAgent() as any;
   async generateCommitMessage(diff: string): Promise<string> {
     const cfg = getConfig();
     const max = cfg.ai?.maxDiffChars ?? 15000;
@@ -64,7 +66,7 @@ ${safeDiff}
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const res = await fetch(url, { ...init, signal: controller.signal });
+        const res = await fetch(url, { ...init, signal: controller.signal, agent: this.agent as any });
         clearTimeout(timer);
         if (res.status === 429 || res.status >= 500) {
           if (i < attempts - 1) {

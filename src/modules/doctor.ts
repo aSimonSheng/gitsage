@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import fetch from 'node-fetch';
+import { ProxyAgent } from 'proxy-agent';
 import { spawnSync } from 'child_process';
 import git from '../git.js';
 import { getConfig } from '../config.js';
@@ -59,7 +60,8 @@ async function tryReach(base: string): Promise<{ ok: boolean; info: string }> {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 2000);
     // We don't require 200; any HTTP response indicates basic reachability
-    const res = await fetch(url, { method: 'GET', signal: controller.signal });
+    const agent = new ProxyAgent() as any;
+    const res = await fetch(url, { method: 'GET', signal: controller.signal, agent });
     clearTimeout(t);
     return { ok: true, info: `HTTP ${res.status}` };
   } catch (e: any) {

@@ -139,6 +139,14 @@ It will check:
 
 If some checks fail, follow the hints to set config keys or proxies.
 
+### Proxy Support
+
+GitSage respects standard proxy environment variables automatically:
+- HTTPS_PROXY / HTTP_PROXY for proxy URL
+- NO_PROXY for bypass rules
+
+No extra configuration is required when these environment variables are set.
+
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!

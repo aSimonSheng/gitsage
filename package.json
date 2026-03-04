@@ -33,6 +33,7 @@
     "inquirer": "^9.2.23",
     "node-fetch": "^3.3.2",
     "ora": "^8.0.1",
+    "proxy-agent": "^6.5.0",
     "simple-git": "^3.24.0"
   },
   "devDependencies": {
