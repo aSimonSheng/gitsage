@@ -6,6 +6,8 @@
 
 ![GitSage](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
+![CI](https://github.com/aSimonSheng/gitsage/actions/workflows/ci.yml/badge.svg)
+![Release](https://github.com/aSimonSheng/gitsage/actions/workflows/release.yml/badge.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
@@ -34,12 +36,25 @@ npm install -g gitsage
 Configure your AI provider:
 
 ```bash
-# Using OpenAI
+# Using OpenAI (or set via gitsage init)
 export OPENAI_API_KEY=your-key-here
 
 # Or using Anthropic
 export ANTHROPIC_API_KEY=your-key-here
 gitsage config set aiProvider anthropic
+```
+
+### Quick Init
+
+```bash
+gitsage init
+```
+
+### Create PR with GitHub CLI
+
+```bash
+# Generate PR title/body, push current branch and open a PR
+gitsage pr --base origin/main --push --open
 ```
 
 ### Usage
@@ -63,6 +78,8 @@ gitsage analyze
 |---------|-------------|
 | `gitsage commit` | AI-assisted commit |
 | `gitsage analyze` | Analyze current changes |
+| `gitsage init` | Interactive setup and commit-msg hook |
+| `gitsage pr --push --open` | Generate and open a GitHub PR |
 | `gitsage config list` | Show configuration |
 | `gitsage config set <key> <value>` | Update configuration |
 
@@ -74,10 +91,24 @@ gitsage config set openai.apiKey sk-...
 
 # Set model
 gitsage config set openai.model gpt-4
+gitsage config set openai.baseURL https://api.openai.com
+gitsage config set openai.maxTokens 512
+
+# Request safeguards
+gitsage config set ai.requestTimeoutMs 20000
+gitsage config set ai.maxDiffChars 15000
 
 # Switch to Anthropic
 gitsage config set aiProvider anthropic
+gitsage config set anthropic.model claude-3-opus
+gitsage config set anthropic.maxTokens 1024
 ```
+
+### Release Automation
+
+Semantic-release keeps versions and CHANGELOG up-to-date.
+- Configure repository secrets: GITHUB_TOKEN (default) and NPM_TOKEN (optional for npm publish).
+- Push to main with conventional commits; release workflow will publish GitHub Release and update CHANGELOG.md.
 
 ## 🤝 Contributing
 
