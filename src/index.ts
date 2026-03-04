@@ -385,6 +385,27 @@ program
       },
       {
         type: 'confirm',
+        name: 'usePreset',
+        message: (a: any) => a.provider === 'openai' ? 'Use an OpenAI-compatible preset (China-friendly)?' : ' ',
+        default: true,
+        when: (a: any) => a.provider === 'openai',
+      },
+      {
+        type: 'list',
+        name: 'preset',
+        message: 'Choose a preset',
+        when: (a: any) => a.provider === 'openai' && a.usePreset,
+        choices: [
+          { name: 'Kimi (Moonshot)', value: 'kimi' },
+          { name: 'Zhipu GLM', value: 'zhipu' },
+          { name: 'DeepSeek', value: 'deepseek' },
+          { name: 'Qwen (DashScope Compatible)', value: 'qwen' },
+          { name: 'Custom/OpenAI Default', value: 'custom' },
+        ],
+        default: 'custom',
+      },
+      {
+        type: 'confirm',
         name: 'installHook',
         message: 'Install commit-msg hook to enforce Conventional Commits?',
         default: true,
@@ -393,6 +414,21 @@ program
     setConfig('aiProvider', answers.provider);
     if (answers.provider === 'openai') {
       if (answers.apiKey) setConfig('openai.apiKey', answers.apiKey);
+      if (answers.usePreset) {
+        if (answers.preset === 'kimi') {
+          setConfig('openai.baseURL', 'https://api.moonshot.cn');
+          setConfig('openai.model', 'moonshot-v1-8k');
+        } else if (answers.preset === 'zhipu') {
+          setConfig('openai.baseURL', 'https://open.bigmodel.cn/api/paas/v4');
+          setConfig('openai.model', 'glm-4');
+        } else if (answers.preset === 'deepseek') {
+          setConfig('openai.baseURL', 'https://api.deepseek.com');
+          setConfig('openai.model', 'deepseek-chat');
+        } else if (answers.preset === 'qwen') {
+          setConfig('openai.baseURL', 'https://dashscope.aliyuncs.com/compatible-mode');
+          setConfig('openai.model', 'qwen-plus');
+        }
+      }
     } else {
       if (answers.apiKey) setConfig('anthropic.apiKey', answers.apiKey);
     }

@@ -50,6 +50,12 @@ gitsage config set aiProvider anthropic
 gitsage init
 ```
 
+China-friendly presets are available in init for OpenAI-compatible endpoints:
+- Kimi (Moonshot): https://api.moonshot.cn
+- Zhipu GLM: https://open.bigmodel.cn/api/paas/v4
+- DeepSeek: https://api.deepseek.com
+- Qwen (DashScope Compatible): https://dashscope.aliyuncs.com/compatible-mode
+
 ### Create PR with GitHub CLI
 
 ```bash
@@ -102,6 +108,10 @@ gitsage config set ai.maxDiffChars 15000
 gitsage config set aiProvider anthropic
 gitsage config set anthropic.model claude-3-opus
 gitsage config set anthropic.maxTokens 1024
+
+# OpenAI-compatible (China-friendly) examples
+gitsage config set openai.baseURL https://api.moonshot.cn
+gitsage config set openai.model moonshot-v1-8k
 ```
 
 ### Release Automation
