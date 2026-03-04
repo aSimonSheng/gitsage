@@ -19,6 +19,8 @@ const defaults = {
   ai: {
     requestTimeoutMs: 20000,
     maxDiffChars: 15000,
+    chunkSizeChars: 8000,
+    maxChunks: 3
   },
 };
 
@@ -86,6 +88,8 @@ export interface Config {
   ai: {
     requestTimeoutMs: number;
     maxDiffChars: number;
+    chunkSizeChars: number;
+    maxChunks: number;
   }
 }
 
