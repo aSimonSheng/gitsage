@@ -1,5 +1,6 @@
 import git from '../git.js';
 import ai from '../ai.js';
+import { getConfig } from '../config.js';
 
 export async function generatePrTitleAndBody(baseRef: string): Promise<{ title: string; body: string }> {
   let diff: string = '';
@@ -13,6 +14,10 @@ export async function generatePrTitleAndBody(baseRef: string): Promise<{ title: 
     throw new Error('No changes found to generate PR content.');
   }
 
+  const cfg = getConfig();
+  const max = cfg.ai?.maxDiffChars ?? 15000;
+  const safeDiff = diff.length > max ? diff.slice(0, max) + '\n[...diff truncated...]' : diff;
+
   const prompt = `
 You are a senior engineer preparing a GitHub Pull Request.
 Given the git diff, produce:
@@ -21,9 +26,8 @@ Given the git diff, produce:
 Keep it practical and terse. No code fences around the output.
 
 Git diff:
-${diff}
+${safeDiff}
   `.trim();
-
   const result = await ai.complete([
     { role: 'system', content: 'You write professional, concise PR descriptions.' },
     { role: 'user', content: prompt },

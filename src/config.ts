@@ -7,11 +7,19 @@ const config = new Conf({
     openai: {
       apiKey: '',
       model: 'gpt-4',
+      baseURL: '',
+      maxTokens: 512,
     },
     anthropic: {
       apiKey: '',
       model: 'claude-3-opus',
+      baseURL: '',
+      maxTokens: 1024,
     },
+    ai: {
+      requestTimeoutMs: 20000,
+      maxDiffChars: 15000
+    }
   },
 });
 
@@ -20,11 +28,19 @@ export interface Config {
   openai: {
     apiKey: string;
     model: string;
+    baseURL?: string;
+    maxTokens?: number;
   };
   anthropic: {
     apiKey: string;
     model: string;
+    baseURL?: string;
+    maxTokens?: number;
   };
+  ai: {
+    requestTimeoutMs: number;
+    maxDiffChars: number;
+  }
 }
 
 export function getConfig(): Config {
