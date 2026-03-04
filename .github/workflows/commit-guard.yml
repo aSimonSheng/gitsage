@@ -1,0 +1,22 @@
+name: Commit Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+  push:
+    branches: [main, master]
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run build
+      - name: Validate commit messages
+        run: |
+          git log -1 --pretty=%B > .last_commit_msg
+          node dist/index.js guard --file .last_commit_msg --explain

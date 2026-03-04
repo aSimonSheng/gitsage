@@ -1,0 +1,45 @@
+{
+  "name": "gitsage",
+  "version": "1.0.0",
+  "description": "AI-powered Git companion that understands your code",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "gitsage": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["git", "ai", "cli", "developer-tools"],
+  "author": "GitSage Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "conf": "^13.0.1",
+    "inquirer": "^9.2.23",
+    "node-fetch": "^3.3.2",
+    "ora": "^8.0.1",
+    "simple-git": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.11.19",
+    "eslint": "^8.56.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.1"
+  },
+  "tsup": {
+    "entry": ["src/index.ts"],
+    "format": ["esm"],
+    "platform": "node",
+    "target": "node18",
+    "clean": true,
+    "shims": true
+  }
+}
