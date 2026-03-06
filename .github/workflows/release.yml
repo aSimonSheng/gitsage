@@ -15,8 +15,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # 用 npx 下载 Node 24+ 运行 semantic-release，满足其版本要求
-      - run: npx -p node@v24 -c "npx semantic-release"
+      - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
